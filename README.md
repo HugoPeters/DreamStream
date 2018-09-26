@@ -10,6 +10,8 @@ The goal of this library is to provide a cross-platform, open source implementat
 
 ### Short term goals:
 - Arduino support (Wi-Fi enabled) (plug and play firmware binaries)
+- Start on data handling (FastLED initially)
+- Configuration webpage
 
 ### Features as of now:
 - manage and control remote devices (although very untested atm)
