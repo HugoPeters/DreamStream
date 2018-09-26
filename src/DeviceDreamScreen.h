@@ -42,36 +42,36 @@ public:
 
 	virtual void HandlePacket(HandleState& hs, const UDPMessageInfo& msg, const PacketInfo& pkt) override;
 
-	// State variables
-	DECLARE_STATEVAR_UINT8(Zones, m_zones)
-	DECLARE_STATEVAR_UINT8_ARRAY(ZonesBrightness, m_zones_brightness, 4)
-	DECLARE_STATEVAR_UINT8_ARRAY(FlexSetup, m_flex_setup, 6)
-	DECLARE_STATEVAR_UINT8(MusicModeType, m_music_mode_type)
-	DECLARE_STATEVAR_UINT8_ARRAY(MusicModeColors, m_music_mode_colors, 3)
-	DECLARE_STATEVAR_UINT8_ARRAY(MusicModeWeights, m_music_mode_weights, 3)
-	DECLARE_STATEVAR_UINT8_ARRAY(MinimumLuminosity, m_minimum_luminosity, 3)
-	DECLARE_STATEVAR_UINT8(IndicatorLightAutoOff, m_indicator_light_auto_off)
-	DECLARE_STATEVAR_UINT8(USBPowerEnable, m_usb_power_enable)
-	DECLARE_STATEVAR_UINT8(SectorBroadcastControl, m_sector_broadcast_control)
-	DECLARE_STATEVAR_UINT8(SectorBroadcastTiming, m_sector_broadcast_timing)
-	DECLARE_STATEVAR_UINT8(HDMIInput, m_hdmi_input)
-	DECLARE_STATEVAR_UINT8(MusicModeSource, m_music_mode_source)
-	DECLARE_STATEVAR_STRING(HDMIInputName1, m_hdmi_name_1)
-	DECLARE_STATEVAR_STRING(HDMIInputName2, m_hdmi_name_2)
-	DECLARE_STATEVAR_STRING(HDMIInputName3, m_hdmi_name_3)
-	DECLARE_STATEVAR_UINT8(CECPassthroughEnable, m_cec_passthrough_enable)
-	DECLARE_STATEVAR_UINT8(CECSwitchingEnable, m_cec_switching_enable)
-	DECLARE_STATEVAR_UINT8(HPDEnable, m_hpd_enable)
-	DECLARE_STATEVAR_UINT8(VideoFrameDelay, m_video_frame_delay)
-	DECLARE_STATEVAR_UINT8(HDMIActiveChannels, m_hdmi_active_channels)
+	// State functions
+	DECLARE_STATEFUNC_UINT8(Zones, m_zones)
+	DECLARE_STATEFUNC_UINT8_ARRAY(ZonesBrightness, m_zones_brightness, 4)
+	DECLARE_STATEFUNC_UINT8_ARRAY(FlexSetup, m_flex_setup, 6)
+	DECLARE_STATEFUNC_UINT8(MusicModeType, m_music_mode_type)
+	DECLARE_STATEFUNC_UINT8_ARRAY(MusicModeColors, m_music_mode_colors, 3)
+	DECLARE_STATEFUNC_UINT8_ARRAY(MusicModeWeights, m_music_mode_weights, 3)
+	DECLARE_STATEFUNC_UINT8_ARRAY(MinimumLuminosity, m_minimum_luminosity, 3)
+	DECLARE_STATEFUNC_UINT8(IndicatorLightAutoOff, m_indicator_light_auto_off)
+	DECLARE_STATEFUNC_UINT8(USBPowerEnable, m_usb_power_enable)
+	DECLARE_STATEFUNC_UINT8(SectorBroadcastControl, m_sector_broadcast_control)
+	DECLARE_STATEFUNC_UINT8(SectorBroadcastTiming, m_sector_broadcast_timing)
+	DECLARE_STATEFUNC_UINT8(HDMIInput, m_hdmi_input)
+	DECLARE_STATEFUNC_UINT8(MusicModeSource, m_music_mode_source)
+	DECLARE_STATEFUNC_STRING(HDMIInputName1, m_hdmi_name_1)
+	DECLARE_STATEFUNC_STRING(HDMIInputName2, m_hdmi_name_2)
+	DECLARE_STATEFUNC_STRING(HDMIInputName3, m_hdmi_name_3)
+	DECLARE_STATEFUNC_UINT8(CECPassthroughEnable, m_cec_passthrough_enable)
+	DECLARE_STATEFUNC_UINT8(CECSwitchingEnable, m_cec_switching_enable)
+	DECLARE_STATEFUNC_UINT8(HPDEnable, m_hpd_enable)
+	DECLARE_STATEFUNC_UINT8(VideoFrameDelay, m_video_frame_delay)
+	DECLARE_STATEFUNC_UINT8(HDMIActiveChannels, m_hdmi_active_channels)
 
 	//TODO: ESP & PIC functionality needs custom setters as they require a key in the payload
 
-	DECLARE_STATEVAR_UINT8(ColorBoost, m_color_boost)
-	DECLARE_STATEVAR_UINT8(CECPowerEnable, m_cec_power_enable)
-	DECLARE_STATEVAR_UINT8(SKUSetup, m_sku_setup)
-	DECLARE_STATEVAR_UINT8(PillarboxingEnable, m_pillarboxing_enable)
-	DECLARE_STATEVAR_UINT8(HDRToneRemapping, m_hdr_tonemapping)
+	DECLARE_STATEFUNC_UINT8(ColorBoost, m_color_boost)
+	DECLARE_STATEFUNC_UINT8(CECPowerEnable, m_cec_power_enable)
+	DECLARE_STATEFUNC_UINT8(SKUSetup, m_sku_setup)
+	DECLARE_STATEFUNC_UINT8(PillarboxingEnable, m_pillarboxing_enable)
+	DECLARE_STATEFUNC_UINT8(HDRToneRemapping, m_hdr_tonemapping)
 
 protected:
 	bool m_is4k;

@@ -30,15 +30,15 @@
 #include "Packet.h"
 
 // Sorry for the mess, but not going to write all this boilerplate code
-#define DECLARE_STATEVAR_UINT8(cmd, member)\
+#define DECLARE_STATEFUNC_UINT8(cmd, member)\
 virtual bool Set##cmd(uint8_t newVal) { bool r = SendCommandCustom(Commands::cmd, PKT_WRITE, (uint8_t*)&newVal, sizeof(newVal)); if (r) { member = newVal; } return r; }\
 virtual uint8_t Get##cmd() const { return member; }
 
-#define DECLARE_STATEVAR_UINT8_ARRAY(cmd, member, arrSize)\
+#define DECLARE_STATEFUNC_UINT8_ARRAY(cmd, member, arrSize)\
 virtual bool Set##cmd(uint8_t data[arrSize]) { static_assert(arrSize == sizeof(member), "Array setter size mismatch!"); bool r = SendCommandConstantUnicastWrite(Commands::cmd, data, sizeof(member)); if (r) { memcpy(member, data, sizeof(member)); } return r; }\
 virtual const uint8_t* Get##cmd() const { return member; }
 
-#define DECLARE_STATEVAR_STRING(cmd, member)\
+#define DECLARE_STATEFUNC_STRING(cmd, member)\
 virtual bool Set##cmd(const char* newVal) { \
 assert(strlen(newVal) < sizeof(member) - 1);\
 char tmp[sizeof(member)]; memset(tmp, 0, sizeof(tmp)); strcpy(tmp, newVal);\
@@ -81,17 +81,17 @@ public:
     bool SendCommandCustom(Commands::Type type, uint8_t flag, uint8_t* payload, int32_t payloadLength);
     bool SendPacket(const char* ip, Commands::Type type, uint8_t flag, uint8_t* payload = nullptr, int32_t payloadLength = 0);
 
-    // State variables
-    DECLARE_STATEVAR_UINT8_ARRAY(AmbientColor, m_ambient_color, 3)
-    DECLARE_STATEVAR_UINT8(AmbientModeType, m_ambient_mode_type)
-    DECLARE_STATEVAR_UINT8(AmbientScene, m_ambient_show_type)
-    DECLARE_STATEVAR_UINT8(Brightness, m_brightness)
-    DECLARE_STATEVAR_UINT8(VideoFrameDelay, m_fade_rate)
-    DECLARE_STATEVAR_STRING(GroupName, m_group_name)
-    DECLARE_STATEVAR_UINT8(GroupNumber, m_group_number)
-    DECLARE_STATEVAR_UINT8(Mode, m_mode)
-    DECLARE_STATEVAR_STRING(Name, m_name)
-    DECLARE_STATEVAR_UINT8_ARRAY(Saturation, m_saturation, 3)
+    // State functions
+    DECLARE_STATEFUNC_UINT8_ARRAY(AmbientColor, m_ambient_color, 3)
+    DECLARE_STATEFUNC_UINT8(AmbientModeType, m_ambient_mode_type)
+    DECLARE_STATEFUNC_UINT8(AmbientScene, m_ambient_show_type)
+    DECLARE_STATEFUNC_UINT8(Brightness, m_brightness)
+    DECLARE_STATEFUNC_UINT8(VideoFrameDelay, m_fade_rate)
+    DECLARE_STATEFUNC_STRING(GroupName, m_group_name)
+    DECLARE_STATEFUNC_UINT8(GroupNumber, m_group_number)
+    DECLARE_STATEFUNC_UINT8(Mode, m_mode)
+    DECLARE_STATEFUNC_STRING(Name, m_name)
+    DECLARE_STATEFUNC_UINT8_ARRAY(Saturation, m_saturation, 3)
 
     // State inits, for some things that need to be transferred
     void InitGroupName(const char* name) { strcpy(m_group_name, name); }
