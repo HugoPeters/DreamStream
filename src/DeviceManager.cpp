@@ -31,8 +31,7 @@
 
 bool DeviceManager::Init(const char* broadcastAddr)
 {
-    memset(m_broadcast_addr, 0, sizeof(m_broadcast_addr));
-    strcpy(m_broadcast_addr, broadcastAddr);
+    m_broadcast_addr = broadcastAddr;
 
     memset(m_packet_cache, 0, sizeof(PACKET_BUFF_SIZE));
 
@@ -86,7 +85,7 @@ void DeviceManager::Update()
 
         // hack to stop messages sent to ourselves...
         // yikes... remove this asap...
-        if (strcmp(msgInfo.m_ipv4addr, "192.168.1.100") == 0)
+        if (msgInfo.m_ipv4addr == "192.168.1.100")
             continue;
 
         HandleDataReceived(msg, msgInfo);
@@ -106,7 +105,7 @@ void DeviceManager::Update()
 bool DeviceManager::BroadcastDiscovery()
 {
 #ifdef ENABLE_CLIENT_DEVICES
-    if (strlen(m_broadcast_addr) == 0)
+    if (m_broadcast_addr.Length())
     {
         LOG_DEBUG("Broadcast IP not set, use SetBroadcastAddress first");
         return false;
@@ -160,7 +159,7 @@ bool DeviceManager::TryBindEmulatedDeviceToHost()
     return false;
 }
 
-int DeviceManager::PreparePacketData(uint8_t group, uint8_t flags, uint8_t cmdUpper, uint8_t cmdLower, uint8_t* payloadData, int32_t payloadSize)
+int DeviceManager::PreparePacketData(uint8_t group, uint8_t flags, uint8_t cmdUpper, uint8_t cmdLower, const uint8_t* payloadData, int32_t payloadSize)
 {
     int32_t packetSize = 7 + payloadSize;
 
@@ -216,7 +215,7 @@ DeviceSideKickEmu* DeviceManager::CreateEmulatedDevice()
     return device;
 }
 
-bool DeviceManager::SendPacket(const char* addr, uint8_t group, uint8_t flag, Commands::Type cmd, uint8_t* payloadData, int32_t payloadSize)
+bool DeviceManager::SendPacket(const char* addr, uint8_t group, uint8_t flag, Commands::Type cmd, const uint8_t* payloadData, int32_t payloadSize)
 {
     bool isBroadcast = PKT_IS(PKT_BROADCAST, flag);
 
@@ -282,7 +281,7 @@ void DeviceManager::HandleDataReceived(const UDPMessage& msg, const UDPMessageIn
     {
         if (pkt.m_type != Commands::SectorData)
         {
-            LOG_DEBUG("[%s]: Received packet [%s]! %s", msgInfo.m_ipv4addr, Commands::Descriptors[pkt.m_type].m_name, flagStr.GetBuffer());
+            LOG_DEBUG("[%s]: Received packet [%s]! %s", msgInfo.m_ipv4addr.Get(), Commands::Descriptors[pkt.m_type].m_name, flagStr.GetBuffer());
 
         #ifdef DEBUG_DUMP_CMD_DATA
             Utils::DumpBytes(msg.m_data, msg.m_length);
@@ -326,7 +325,7 @@ void DeviceManager::HandleDataReceived(const UDPMessage& msg, const UDPMessageIn
     }
     else
     {
-        LOG_WARN("[%s]: Received a bad packet %s", msgInfo.m_ipv4addr, flagStr.GetBuffer());
+        LOG_WARN("[%s]: Received a bad packet %s", msgInfo.m_ipv4addr.Get(), flagStr.GetBuffer());
         Utils::DumpBytes(msg.m_data, msg.m_length, true);
     }
 }
@@ -374,7 +373,7 @@ void DeviceManager::HandlePacket(const PacketInfo& pkt, const UDPMessageInfo& ms
             , PKT_IS(PKT_WRITE, flag) ? "w" : ""
             , PKT_IS(PKT_WRITE_CONSTANT, flag) ? "u" : "");
 
-        LOG_DEBUG("[%s]: Unhandled packet (handled=%i, unhandled=%i) [%s] %s", msgInfo.m_ipv4addr, hs.GetNumHandled(), hs.GetNumUnhandled(), Commands::Descriptors[pkt.m_type].m_name, flagStr.GetBuffer());
+        LOG_DEBUG("[%s]: Unhandled packet (handled=%i, unhandled=%i) [%s] %s", msgInfo.m_ipv4addr.Get(), hs.GetNumHandled(), hs.GetNumUnhandled(), Commands::Descriptors[pkt.m_type].m_name, flagStr.GetBuffer());
     }
 }
 
@@ -413,17 +412,17 @@ void DeviceManager::HandlePacket_CurrentState_NewDevice(const PacketInfo& pkt, c
             {
                 bootOk = true;
                 m_devices.push_back(newDev);
-                LOG_WARN("Received a device in bootloader mode! (%s)", msgInfo.m_ipv4addr);
+                LOG_WARN("Received a device in bootloader mode! (%s)", msgInfo.m_ipv4addr.Get());
             }; break;
             case 3:
             case 4:
             {
-                LOG_WARN("Received a device with a bad boot state (%i): %s", bootState, msgInfo.m_ipv4addr);
+                LOG_WARN("Received a device with a bad boot state (%i): %s", bootState, msgInfo.m_ipv4addr.Get());
                 bootOk = false;
             }; break;
             default:
             {
-                LOG_WARN("Received a device with an invalid boot state (%i): %s", bootState, msgInfo.m_ipv4addr);
+                LOG_WARN("Received a device with an invalid boot state (%i): %s", bootState, msgInfo.m_ipv4addr.Get());
                 bootOk = false;
             }; break;
         }
@@ -454,7 +453,7 @@ void DeviceManager::HandlePacket_CurrentState_NewDevice(const PacketInfo& pkt, c
         dev->SetHostAddress(msgInfo.m_ipv4addr);
 
         LOG_INFO("[%s]: Found a new device! (name=%s [group=%s] : type=%s)"
-            , msgInfo.m_ipv4addr, dev->GetName(), dev->GetGroupName(), DeviceType::Names[dev->GetType()]);
+            , msgInfo.m_ipv4addr.Get(), dev->GetName(), dev->GetGroupName(), DeviceType::Names[dev->GetType()]);
     }
 }
 #endif // ENABLE_CLIENT_DEVICES

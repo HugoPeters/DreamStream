@@ -37,10 +37,11 @@ DeviceDreamScreen::~DeviceDreamScreen()
 
 void DeviceDreamScreen::SetStateFromPayload(const uint8_t* payload, int32_t payloadLength)
 {
-    memcpy(m_name, &payload[0], 16);
-    if (strlen(m_name) == 0) strcpy(m_name, m_is4k ? "DreamScreen 4K" : "DreamScreen HD");
-    memcpy(m_group_name, &payload[16], 16);
-    if (strlen(m_group_name) == 0) strcpy(m_group_name, "Group");
+    m_name.CopyFrom(&payload[0], 16);
+    if (m_name.Length() == 0) m_name = m_is4k ? "DreamScreen 4K" : "DreamScreen HD";
+  
+    m_group_name.CopyFrom(&payload[16], 16);
+    if (m_group_name.Length() == 0) m_group_name = "Group";
 
     m_group_number = payload[32];
     m_mode = payload[33];
@@ -65,9 +66,9 @@ void DeviceDreamScreen::SetStateFromPayload(const uint8_t* payload, int32_t payl
     m_sector_broadcast_timing = payload[72];
     m_hdmi_input = payload[73];
     m_music_mode_source = payload[74];
-    memcpy(m_hdmi_name_1, &payload[75], 16);
-    memcpy(m_hdmi_name_2, &payload[91], 16);
-    memcpy(m_hdmi_name_3, &payload[107], 16);
+    m_hdmi_name_1.CopyFrom(&payload[75], 16);
+    m_hdmi_name_2.CopyFrom(&payload[91], 16);
+    m_hdmi_name_3.CopyFrom(&payload[107], 16);
     m_cec_passthrough_enable = payload[123];
     m_cec_switching_enable = payload[124];
     m_hpd_enable = payload[125];

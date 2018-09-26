@@ -24,6 +24,7 @@
 #define _Device_H_
 
 #include "UDPClient.h"
+#include "StaticString.h"
 #include "DeviceType.h"
 #include "Commands.h"
 #include <cassert>
@@ -31,19 +32,18 @@
 
 // Sorry for the mess, but not going to write all this boilerplate code
 #define DECLARE_STATEFUNC_UINT8(cmd, member)\
-virtual bool Set##cmd(uint8_t newVal) { bool r = SendCommandCustom(Commands::cmd, PKT_WRITE, (uint8_t*)&newVal, sizeof(newVal)); if (r) { member = newVal; } return r; }\
+virtual bool Set##cmd(uint8_t newVal) { member = newVal; return SendCommandCustom(Commands::cmd, PKT_WRITE, (const uint8_t*)&newVal, sizeof(newVal)); }\
 virtual uint8_t Get##cmd() const { return member; }
 
 #define DECLARE_STATEFUNC_UINT8_ARRAY(cmd, member, arrSize)\
-virtual bool Set##cmd(uint8_t data[arrSize]) { static_assert(arrSize == sizeof(member), "Array setter size mismatch!"); bool r = SendCommandConstantUnicastWrite(Commands::cmd, data, sizeof(member)); if (r) { memcpy(member, data, sizeof(member)); } return r; }\
+virtual bool Set##cmd(uint8_t data[arrSize]) { static_assert(arrSize == sizeof(member), "Array setter size mismatch!"); bool r = SendCommandConstantUnicastWrite(Commands::cmd, data, sizeof(member)); memcpy(member, data, sizeof(member)); return r; }\
 virtual const uint8_t* Get##cmd() const { return member; }
 
 #define DECLARE_STATEFUNC_STRING(cmd, member)\
 virtual bool Set##cmd(const char* newVal) { \
-assert(strlen(newVal) < sizeof(member) - 1);\
-char tmp[sizeof(member)]; memset(tmp, 0, sizeof(tmp)); strcpy(tmp, newVal);\
-bool r = SendCommandConstantUnicastWrite(Commands::cmd, (uint8_t*)tmp, sizeof(member));\
-if (r) { memcpy(member, tmp, sizeof(member)); } return r; }\
+assert(strlen(newVal) <= member.BufferLength());\
+member = newVal;\
+return SendCommandConstantUnicastWrite(Commands::cmd, (const uint8_t*)member.Get(), member.BufferLength()); }\
 virtual const char* Get##cmd() const { return member; }
 
 struct PacketInfo;
@@ -61,25 +61,25 @@ public:
 
     virtual void Update() { }
 
-    void SetHostAddress(const char* address) { if (address) strcpy(m_host_address, address); else memset(m_host_address, 0, sizeof(m_host_address)); }
-    void SetBroadcastAddress(const char* address) { strcpy(m_broadcast_address, address); }
+    void SetHostAddress(const char* address) { m_host_address = address; }
+    void SetBroadcastAddress(const char* address) { m_broadcast_address = address; }
 
     const char* GetDeviceAddress() const { return m_device_address; }
     const char* GetHostAddress() const { return m_host_address; }
     const char* GetBroadcastAddress() const { return m_broadcast_address; }
 
-    bool HasHostAddress() const { return strlen(m_host_address) > 0; }
+    bool HasHostAddress() const { return m_host_address.Length() > 0; }
 
     DeviceManager* GetManager() const { return m_manager; }
     void SetEmulated(bool enable) { m_is_emulated = enable; }
     bool IsEmulated() const { return m_is_emulated; }
 
     // Network
-    bool SendCommandWrite(Commands::Type type, bool broadcast, uint8_t* payload, int32_t payloadLength);
-    bool SendCommandConstantUnicastWrite(Commands::Type type, uint8_t* payload, int32_t payloadLength);
+    bool SendCommandWrite(Commands::Type type, bool broadcast, const  uint8_t* payload, int32_t payloadLength);
+    bool SendCommandConstantUnicastWrite(Commands::Type type, const uint8_t* payload, int32_t payloadLength);
     bool SendCommandUnicastRead(Commands::Type type);
-    bool SendCommandCustom(Commands::Type type, uint8_t flag, uint8_t* payload, int32_t payloadLength);
-    bool SendPacket(const char* ip, Commands::Type type, uint8_t flag, uint8_t* payload = nullptr, int32_t payloadLength = 0);
+    bool SendCommandCustom(Commands::Type type, uint8_t flag, const uint8_t* payload, int32_t payloadLength);
+    bool SendPacket(const char* ip, Commands::Type type, uint8_t flag, const uint8_t* payload = nullptr, int32_t payloadLength = 0);
 
     // State functions
     DECLARE_STATEFUNC_UINT8_ARRAY(AmbientColor, m_ambient_color, 3)
@@ -94,7 +94,7 @@ public:
     DECLARE_STATEFUNC_UINT8_ARRAY(Saturation, m_saturation, 3)
 
     // State inits, for some things that need to be transferred
-    void InitGroupName(const char* name) { strcpy(m_group_name, name); }
+    void InitGroupName(const char* name) { m_group_name = name; }
 
     // State updating
     virtual void SetStateFromPayload(const uint8_t* payload, int32_t payloadLength) = 0;
@@ -104,9 +104,9 @@ public:
 
 protected:
     DeviceType::Type m_type;
-    char m_device_address[IPV4_ADDRSTRLEN];
-    char m_host_address[IPV4_ADDRSTRLEN];
-    char m_broadcast_address[IPV4_ADDRSTRLEN];
+    StaticString<IPV4_ADDRSTRLEN> m_device_address;
+    StaticString<IPV4_ADDRSTRLEN> m_host_address;
+    StaticString<IPV4_ADDRSTRLEN> m_broadcast_address;
     DeviceManager* m_manager;
     bool m_is_emulated;
 
@@ -115,10 +115,10 @@ protected:
     uint8_t m_ambient_show_type             = 0;
     uint8_t m_brightness                    = 0;
     uint8_t m_fade_rate                     = 4;
-    char m_group_name[16]                   = "unassigned";
+    StaticString<16> m_group_name           = "unassigned";
     uint8_t m_group_number                  = 0;
     uint8_t m_mode                          = 0;
-    char m_name[16];
+    StaticString<16> m_name;
     uint8_t m_saturation[3]                 = { 0xFF, 0xFF, 0xFF };
 };
 

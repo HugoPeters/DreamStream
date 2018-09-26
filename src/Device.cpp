@@ -29,14 +29,9 @@
 Device::Device(DeviceManager* manager, DeviceType::Type type, const char* ip)
     : m_type(type)
     , m_manager(manager)
+    , m_device_address(ip)
 {
     assert(manager);
-    memset(m_device_address, 0, sizeof(m_device_address));
-    memset(m_broadcast_address, 0, sizeof(m_broadcast_address));
-    memset(m_host_address, 0, sizeof(m_host_address));
-    strcpy(m_device_address, ip);
-
-    memset(m_name, 0, sizeof(m_name));
 }
 
 Device::~Device()
@@ -44,7 +39,7 @@ Device::~Device()
 
 }
 
-bool Device::SendCommandWrite(Commands::Type type, bool broadcast, uint8_t* payload, int32_t payloadLength)
+bool Device::SendCommandWrite(Commands::Type type, bool broadcast, const uint8_t* payload, int32_t payloadLength)
 {
     if (!m_is_emulated)
         return false;
@@ -60,7 +55,7 @@ bool Device::SendCommandWrite(Commands::Type type, bool broadcast, uint8_t* payl
     return GetManager()->SendPacket(addr, m_group_number, flag, type, payload, payloadLength);
 }
 
-bool Device::SendCommandConstantUnicastWrite(Commands::Type type, uint8_t* payload, int32_t payloadLength)
+bool Device::SendCommandConstantUnicastWrite(Commands::Type type, const uint8_t* payload, int32_t payloadLength)
 {
     if (!HasHostAddress())
     {
@@ -86,7 +81,7 @@ bool Device::SendCommandUnicastRead(Commands::Type type)
 
 }
 
-bool Device::SendCommandCustom(Commands::Type type, uint8_t flag, uint8_t* payload, int32_t payloadLength)
+bool Device::SendCommandCustom(Commands::Type type, uint8_t flag, const uint8_t* payload, int32_t payloadLength)
 {
     if (!m_is_emulated)
         return false;
@@ -100,7 +95,7 @@ bool Device::SendCommandCustom(Commands::Type type, uint8_t flag, uint8_t* paylo
     return GetManager()->SendPacket(m_host_address, m_group_number, flag, type, payload, payloadLength);
 }
 
-bool Device::SendPacket(const char* ip, Commands::Type type, uint8_t flag, uint8_t* payload /*= nullptr*/, int32_t payloadLength /*= 0*/)
+bool Device::SendPacket(const char* ip, Commands::Type type, uint8_t flag, const uint8_t* payload /*= nullptr*/, int32_t payloadLength /*= 0*/)
 {
     return GetManager()->SendPacket(ip, m_group_number, flag, type, payload, payloadLength);
 }
@@ -111,7 +106,7 @@ void Device::HandlePacket(HandleState& hs, const UDPMessageInfo& msg, const Pack
     {
         switch (pkt.m_type)
         {
-            case Commands::Mode: PacketUtils::TrySetFromPayload(&m_mode, pkt); hs.SetHandled(); break;
+            case Commands::Mode: PacketUtils::TrySetFromPayload(m_mode, pkt); hs.SetHandled(); break;
             default: hs.SetUnhandled(); break;
         }
     }

@@ -35,8 +35,7 @@ DeviceSideKickEmu::DeviceSideKickEmu(DeviceManager* manager)
 
     m_group_number = 0x1;
 
-    memset(m_name, 0, sizeof(m_name));
-    strcpy(m_name, "DREAMSTREAM");
+    m_name = "DreamStream";
 }
 
 DeviceSideKickEmu::~DeviceSideKickEmu()
@@ -90,9 +89,9 @@ void DeviceSideKickEmu::HandlePacket(HandleState& hs, const UDPMessageInfo& msg,
     {
         switch (pkt.m_type)
         {
-            case Commands::Brightness: PacketUtils::TrySetFromPayload(&m_brightness, pkt);  hs.SetHandled(); break;
-            case Commands::Mode: PacketUtils::TrySetFromPayload(&m_mode, pkt);  hs.SetHandled(); break;
-            case Commands::GroupNumber: PacketUtils::TrySetFromPayload(&m_group_number, pkt);  hs.SetHandled(); break;
+            case Commands::Brightness: PacketUtils::TrySetFromPayload(m_brightness, pkt);  hs.SetHandled(); break;
+            case Commands::Mode: PacketUtils::TrySetFromPayload(m_mode, pkt);  hs.SetHandled(); break;
+            case Commands::GroupNumber: PacketUtils::TrySetFromPayload(m_group_number, pkt);  hs.SetHandled(); break;
             case Commands::Name: PacketUtils::TrySetFromPayload(m_name, pkt);  hs.SetHandled(); break;
             case Commands::GroupName: PacketUtils::TrySetFromPayload(m_name, pkt);  hs.SetHandled(); break;
             default: hs.SetUnhandled(); break;

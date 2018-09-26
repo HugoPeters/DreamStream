@@ -39,6 +39,8 @@
 #include <arpa/inet.h>
 #include <sys/select.h>
 
+#include "StaticString.h"
+
 #define IPV4_ADDRSTRLEN INET_ADDRSTRLEN
 #endif
 
@@ -50,7 +52,7 @@ struct UDPMessage
 
 struct UDPMessageInfo
 {
-    char m_ipv4addr[IPV4_ADDRSTRLEN];
+    StaticString<IPV4_ADDRSTRLEN> m_ipv4addr;
 };
 
 struct UDPClient

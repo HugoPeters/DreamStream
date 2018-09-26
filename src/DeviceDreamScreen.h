@@ -89,9 +89,9 @@ protected:
 	uint8_t m_sector_broadcast_timing           = 1;
 	uint8_t m_hdmi_input                        = 0;
 	uint8_t m_music_mode_source                 = 0;
-	char m_hdmi_name_1[16]                      = "HDMI 1";
-	char m_hdmi_name_2[16]                      = "HDMI 2";
-	char m_hdmi_name_3[16]                      = "HDMI 3";
+    StaticString<16> m_hdmi_name_1              = "HDMI 1";
+    StaticString<16> m_hdmi_name_2              = "HDMI 2";
+    StaticString<16> m_hdmi_name_3              = "HDMI 3";
 	uint8_t m_cec_passthrough_enable            = 1;
 	uint8_t m_cec_switching_enable              = 1;
 	uint8_t m_hpd_enable                        = 1;

@@ -20,59 +20,85 @@
 * THE SOFTWARE.                                                                 *
 *********************************************************************************/
 
-#include "Packet.h"
-#include "Utils.h"
-#include "Defines.h"
+#ifndef _StaticString_H_
+#define _StaticString_H_
 
-bool PacketUtils::ReadPacketHeader(const uint8_t* data, int32_t dataSize, PacketInfo& outInfo)
+#include <cstdint>
+#include <string.h>
+
+template<uint32_t TBuffSize>
+struct StaticString
 {
-    if (dataSize < sizeof(PacketHeader))
-        return false;
-
-    PacketHeader* hdr = (PacketHeader*)data;
-
-    if (hdr->m_magic != DS_PACKET_MAGIC)
-        return false;
-
-    int packetSize = hdr->m_length + 2;
-
-    if (packetSize > dataSize)
-        return false;
-
-    uint8_t storedCrc = data[packetSize - 1];
-    uint8_t calcCrc = Utils::CalculateCRC8(data, packetSize - 1);
-
-    if (calcCrc != storedCrc)
+public:
+    StaticString()
     {
-        LOG_DEBUG("Packet CRCs did not match (stored=0x%x, calc=0x%x)", storedCrc, calcCrc);
-        return false;
+        Clear();
+    }
+    StaticString(const char* other)
+    {
+        Set(other);
     }
 
-    Commands::Type packetType = Commands::INVALID;
+    const char* Get() const { return GetBuffer(); }
 
-    CMD cmd = { hdr->m_cmd_upper, hdr->m_cmd_lower };
-
-    for (int i = Commands::INVALID + 1; i < Commands::NUM; ++i)
+    bool operator==(const char* other)
     {
-        const CommandDescriptor& desc = Commands::Descriptors[i];
-
-        if (desc.m_cmd.code == cmd.code)
-        {
-            packetType = static_cast<Commands::Type>(i);
-        }
+        return strcmp(m_buffer, other) == 0;
     }
 
-    if (packetType == Commands::INVALID)
+    int Strcmp(const char* other)
     {
-        LOG_WARN("Unknown packet received! (cmd_upper=0x%x, cmd_lower=0x%x)", hdr->m_cmd_upper, hdr->m_cmd_lower);
-        return false;
+        return strcmp(m_buffer, other);
     }
 
-    outInfo.m_hdr = hdr;
-    outInfo.m_type = packetType;
-    outInfo.m_payload = data + sizeof(PacketHeader);
-    outInfo.m_payloadSize = packetSize - sizeof(PacketHeader) - 1; /* (-1 for CRC) */
-    outInfo.m_flag = hdr->m_flags; // copy the flag to minimize access
+    void operator=(const char* other)
+    {
+        Set(other);
+    }
 
-    return true;
-}
+    void Set(const char* str)
+    {
+        Clear();
+
+        if (!str)
+            return;
+
+        size_t otherStrLen = strlen(str);
+        size_t minSize = otherStrLen < TBuffSize ? otherStrLen : TBuffSize;
+        strncpy(m_buffer, str, minSize);
+    }
+
+    void Clear()
+    {
+        memset(m_buffer, 0, sizeof(m_buffer));
+    }
+
+    operator const char*() const
+    {
+        return GetBuffer();
+    }
+
+    const char* GetBuffer() const
+    {
+        return static_cast<const char*>(m_buffer);
+    }
+
+    size_t Length() const
+    {
+        return strlen(m_buffer);
+    }
+
+    uint32_t BufferLength() const { return TBuffSize; }
+
+    void CopyFrom(const uint8_t* ptr, size_t count)
+    {
+        Clear();
+        size_t minSize = count < TBuffSize ? count : TBuffSize;
+        memcpy(m_buffer, ptr, minSize);
+    }
+
+private:
+    char m_buffer[TBuffSize + 1];
+};
+
+#endif // _StaticString_H_

@@ -59,7 +59,7 @@ struct Strfmt
     }
 
 private:
-    char m_buffer[TBuffSize];
+    char m_buffer[TBuffSize + 1];
 };
 
 // Logging macros

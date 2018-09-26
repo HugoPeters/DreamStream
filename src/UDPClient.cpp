@@ -190,7 +190,10 @@ int32_t UDPClientImpl::Receive(UDPMessage* outMsg /*= 0*/, UDPMessageInfo* outMs
 
     if (outMsgInfo)
     {
-        inet_ntop(AF_INET, &(from.sin_addr), outMsgInfo->m_ipv4addr, INET_ADDRSTRLEN);
+        char tempAddress[INET_ADDRSTRLEN + 1];
+        memset(tempAddress, 0, sizeof(tempAddress));
+        inet_ntop(AF_INET, &(from.sin_addr), tempAddress, INET_ADDRSTRLEN);
+        outMsgInfo->m_ipv4addr = tempAddress;
     }
 
     return count;

@@ -27,6 +27,7 @@
 #include "UDPClient.h"
 #include "Device.h"
 #include "Commands.h"
+#include "StaticString.h"
 #include <vector>
 
 class DeviceSideKickEmu;
@@ -51,12 +52,12 @@ public:
     bool Connect(const char* ip);
     bool TryBindEmulatedDeviceToHost();
 
-    int PreparePacketData(uint8_t group, uint8_t flags, uint8_t cmdUpper, uint8_t cmdLower, uint8_t* payloadData, int32_t payloadSize);
+    int PreparePacketData(uint8_t group, uint8_t flags, uint8_t cmdUpper, uint8_t cmdLower, const uint8_t* payloadData, int32_t payloadSize);
 
     Device* FindDevice(const char* ipaddr);
     DeviceSideKickEmu* CreateEmulatedDevice();
 
-    bool SendPacket(const char* addr, uint8_t group, uint8_t flag, Commands::Type cmd, uint8_t* payloadData, int32_t payloadSize);
+    bool SendPacket(const char* addr, uint8_t group, uint8_t flag, Commands::Type cmd, const uint8_t* payloadData, int32_t payloadSize);
 
 private:
     void HandleDataReceived(const UDPMessage& msg, const UDPMessageInfo& msgInfo);
@@ -78,7 +79,7 @@ private:
 
     Device* m_emu_device;
 
-    char m_broadcast_addr[IPV4_ADDRSTRLEN];
+    StaticString<IPV4_ADDRSTRLEN> m_broadcast_addr;
 };
 
 #endif // _DeviceManager_H_

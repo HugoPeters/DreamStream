@@ -28,7 +28,7 @@ DeviceSideKick::DeviceSideKick(DeviceManager* manager, const char* ip)
 {
     memset(m_sector_assignment, 0, sizeof(m_sector_assignment));
     memset(m_esp_firmware_version, 0, sizeof(m_esp_firmware_version));
-    strcpy(m_name, "SideKick");
+    m_name = "SideKick";
 }
 
 DeviceSideKick::~DeviceSideKick()
@@ -38,10 +38,10 @@ DeviceSideKick::~DeviceSideKick()
 
 void DeviceSideKick::SetStateFromPayload(const uint8_t* payload, int32_t payloadLength)
 {
-    memcpy(m_name, &payload[0], 16);
-    if (strlen(m_name) == 0) strcpy(m_name, "SideKick");
-    memcpy(m_group_name, &payload[16], 16);
-    if (strlen(m_group_name) == 0) strcpy(m_group_name, "unassigned");
+    m_name.CopyFrom(&payload[0], 16);
+    if (m_name.Length() == 0) m_name = "SideKick";
+    m_group_name.CopyFrom(&payload[16], 16);
+    if (m_group_name.Length() == 0) m_group_name = "unassigned";
 
     m_group_number = payload[32];
     m_mode = payload[33];

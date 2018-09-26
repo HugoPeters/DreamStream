@@ -25,6 +25,7 @@
 
 #include <stdint.h>
 #include "Commands.h"
+#include "StaticString.h"
 
 #define PKT_RESPONSE            (1UL << 6)
 #define PKT_BROADCAST           (1UL << 5)
@@ -67,36 +68,32 @@ namespace PacketUtils
     }
 
     template<typename T>
-    static bool TrySetFromPayload(T* target, const PacketInfo& pkt)
+    static bool TrySetFromPayload(T& target, const PacketInfo& pkt)
     {
         assert(false);
         return false;
     }
 
     template<>
-    bool TrySetFromPayload(uint8_t* target, const PacketInfo& pkt)
+    bool TrySetFromPayload(uint8_t& target, const PacketInfo& pkt)
     {
-        assert(target);
-
         if (pkt.m_payloadSize < 1)
             return false;
         else
         {
-            *target = pkt.m_payload[0];
+            target = pkt.m_payload[0];
             return true;
         }
     }
 
-    template<>
-    bool TrySetFromPayload(char* target, const PacketInfo& pkt)
+    template<int32_t N>
+    bool TrySetFromPayload(StaticString<N>& target, const PacketInfo& pkt)
     {
-        assert(target);
-
         if (pkt.m_payloadSize < 1)
             return false;
         else
         {
-            memcpy(target, pkt.m_payload, pkt.m_payloadSize);
+            target.CopyFrom(pkt.m_payload, pkt.m_payloadSize);
             return true;
         }
     }
