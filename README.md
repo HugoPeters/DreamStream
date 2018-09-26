@@ -9,7 +9,7 @@ The goal of this library is to provide a cross-platform, open source implementat
 - Control emulated and external devices using MQTT
 
 ### Short term goals:
-- Arduino support (Wi-Fi enabled)
+- Arduino support (Wi-Fi enabled) (plug and play firmware binaries)
 
 ### Features as of now:
 - manage and control remote devices (although very untested atm)
@@ -18,16 +18,20 @@ The goal of this library is to provide a cross-platform, open source implementat
 - pretty complete implementation of DreamScreen / SideKick state payloads
 
 ### Todo:
-- extremely early, so expect a few hacks here and there
+- extremely early, so expect hacks here and there
 - fix up windows version (currently only runs on linux)
 - actually do something with the sector data
 - store device info in some config file
 - make devices connect to host when streaming sectors
 - clean up includes
-- remove hack to stop messages broadcasted to ourselves (device manager), switch to multicast?
+- remove (big) hack to stop messages broadcasted to ourselves (device manager), switch to multicast?
 - fix up warnings
 - better application lifecycle
 - start porting to arduino!
 
 ### Build instructions:
 - none, do not run this yet lol
+
+### Credits
+- DreamScreen LLC
+- Robert Koszewski for his initial Java implementation: https://github.com/rkkoszewski/DSComEmu
