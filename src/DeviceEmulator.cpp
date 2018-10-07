@@ -26,6 +26,18 @@
 #include "DeviceManager.h"
 #include "DeviceType.h"
 #include "PacketHelpers.h"
+#include "Enums.h"
+
+#define FASTLED_ALLOW_INTERRUPTS 0
+
+#include "FastLED.h"
+
+#define NUM_LEDS 1
+#define LED_TYPE WS2812B
+#define DATA_PIN 5
+#define COLOR_ORDER GRB
+
+CRGB leds[5];
 
 DeviceSideKickEmu::DeviceSideKickEmu(DeviceManager* manager)
     : DeviceSideKick(manager, "127.0.0.1")
@@ -36,6 +48,9 @@ DeviceSideKickEmu::DeviceSideKickEmu(DeviceManager* manager)
     m_group_number = 0x1;
 
     m_name = "DreamStream";
+
+    FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
+    FastLED.setBrightness(100);
 }
 
 DeviceSideKickEmu::~DeviceSideKickEmu()
@@ -59,6 +74,18 @@ void DeviceSideKickEmu::Update()
             LOG_INFO("Sector subscription timed out!");
         }
     }
+
+    if (m_mode == DeviceMode::AMBIENT)
+    {
+        leds[0] = CRGB(m_ambient_color[0], m_ambient_color[1], m_ambient_color[2]);
+    }
+
+    FastLED.show();
+}
+
+void DeviceSideKickEmu::HandleChangeBrightness()
+{
+    FastLED.setBrightness(m_brightness);
 }
 
 void DeviceSideKickEmu::HandlePacket(HandleState& hs, const UDPMessageInfo& msg, const PacketInfo& pkt)
@@ -89,7 +116,8 @@ void DeviceSideKickEmu::HandlePacket(HandleState& hs, const UDPMessageInfo& msg,
     {
         switch (pkt.m_type)
         {
-            case Commands::Brightness: PacketUtils::TrySetFromPayload(m_brightness, pkt);  hs.SetHandled(); break;
+            case Commands::AmbientColor: memcpy(m_ambient_color, pkt.m_payload, 3);  hs.SetHandled(); break;
+            case Commands::Brightness: PacketUtils::TrySetFromPayload(m_brightness, pkt); HandleChangeBrightness(); hs.SetHandled(); break;
             case Commands::Mode: PacketUtils::TrySetFromPayload(m_mode, pkt);  hs.SetHandled(); break;
             case Commands::GroupNumber: PacketUtils::TrySetFromPayload(m_group_number, pkt);  hs.SetHandled(); break;
             case Commands::Name: PacketUtils::TrySetFromPayload(m_name, pkt);  hs.SetHandled(); break;
@@ -132,6 +160,7 @@ void DeviceSideKickEmu::HandlePacket_Response_SectorData(const UDPMessageInfo& m
     {
         if (const PacketSectorData* data = PacketUtils::GetPayloadAs<PacketSectorData>(pkt))
         {
+            leds[0] = CRGB(data->m_sector_1[0], data->m_sector_1[1], data->m_sector_1[2]);
         }
     }
 }

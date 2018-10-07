@@ -113,7 +113,7 @@ protected:
     uint8_t m_ambient_color[3]              = { 0, 0, 0 };
     uint8_t m_ambient_mode_type             = 0;
     uint8_t m_ambient_show_type             = 0;
-    uint8_t m_brightness                    = 0;
+    uint8_t m_brightness                    = 255;
     uint8_t m_fade_rate                     = 4;
     StaticString<16> m_group_name           = "unassigned";
     uint8_t m_group_number                  = 0;

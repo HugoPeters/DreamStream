@@ -68,12 +68,14 @@ private:
 #define LOG_WARN(...)
 #define LOG_DEBUG(...)
 #define LOG_ERROR(...)
+#define LOG(...)
 #else
 #define ENABLE_LOGGING
 #define LOG_INFO(msg, ...) Logger::Log(LogSeverity::INFO, Strfmt<LOG_BUFF_SIZE>(msg, ## __VA_ARGS__))
 #define LOG_WARN(msg, ...) Logger::Log(LogSeverity::WARN, Strfmt<LOG_BUFF_SIZE>(msg, ## __VA_ARGS__))
 #define LOG_DEBUG(msg, ...) Logger::Log(LogSeverity::DEBUG, Strfmt<LOG_BUFF_SIZE>(msg, ## __VA_ARGS__))
 #define LOG_ERROR(msg, ...) Logger::Log(LogSeverity::ERROR, Strfmt<LOG_BUFF_SIZE>(msg, ## __VA_ARGS__))
+#define LOG(severity, msg, ...) Logger::Log(severity, Strfmt<LOG_BUFF_SIZE>(msg, ## __VA_ARGS__))
 #endif
 
 namespace LogSeverity

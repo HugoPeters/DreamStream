@@ -20,39 +20,19 @@
 * THE SOFTWARE.                                                                 *
 *********************************************************************************/
 
-#include "Defines.h"
+#ifndef _PacketHelpers_H_
+#define _PacketHelpers_H_
 
-#ifndef ARDUINO
+#include <cstdint>
 
-#include <cstdio>
-#include "Utils.h"
-#include "DeviceManager.h"
-
-int main(int argc, char* argv[])
+struct SectorRGB
 {
-    Logger::SetMinSeverity(LogSeverity::DEBUG);
+    uint8_t rgb[3];
+};
 
-    LOG_INFO("DreamStream : Boot");
+struct PacketSectorData
+{
+    SectorRGB m_sectors[12];
+};
 
-    DeviceManager& dvmgr = DeviceManager::GetInstance();
-
-    if (!dvmgr.Init("255.255.255.255"))
-        return -1;
-
-    dvmgr.CreateEmulatedDevice();
-    dvmgr.BroadcastDiscovery();
-
-    LOG_INFO("DreamStream : Start listening for incoming packets...");
-
-    bool isRunning = true;
-
-    while (isRunning)
-    {
-        Utils::Sleep(2);
-        dvmgr.Update();
-    }
-
-    return 0;
-}
-
-#endif
+#endif // _PacketHelpers_H_

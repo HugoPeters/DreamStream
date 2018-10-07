@@ -23,9 +23,16 @@
 #ifndef _UDPClient_H_
 #define _UDPClient_H_
 
+#include "Defines.h"
 #include <cstdint>
+#include "StaticString.h"
 
-#if (defined(__linux__) || defined(_WIN32))
+#if (defined(ARDUINO))
+#include <WiFiUdp.h>
+
+#define IPV4_ADDRSTRLEN 32
+
+#elif (defined(__linux__) || defined(_WIN32))
 //#include "clsocket/ActiveSocket.h"
 //#include "clsocket/PassiveSocket.h"
 
@@ -38,8 +45,6 @@
 #include <fcntl.h>
 #include <arpa/inet.h>
 #include <sys/select.h>
-
-#include "StaticString.h"
 
 #define IPV4_ADDRSTRLEN INET_ADDRSTRLEN
 #endif
@@ -69,7 +74,28 @@ struct UDPClient
     virtual bool Select(int32_t timeoutSec, int32_t timeoutUSec) = 0;
 };
 
-#if (defined(__linux__) || defined(_WIN32))
+#if (defined(ARDUINO))
+struct UDPClientImpl : public UDPClient
+{
+    UDPClientImpl();
+    ~UDPClientImpl();
+
+    bool Init(const char* hostname, uint16_t port) override;
+    bool EnableBroadcast(bool enable) override;
+    bool IsBroadcast() const override { return m_is_broadcast; }
+    bool Connect(const char* ip, uint16_t port) override;
+    bool Send(const char* addr, uint16_t port, uint8_t* data, uint32_t dataSize) override;
+    int32_t Receive(UDPMessage* outMsg, UDPMessageInfo* outMsgInfo) override;
+    bool Select(int32_t timeoutSec, int32_t timeoutUSec) override;
+
+private:
+    WiFiUDP udp;
+    uint8_t m_buffer[549];
+    bool m_is_broadcast;
+
+};
+
+#elif (defined(__linux__) || defined(_WIN32))
 struct UDPClientImpl : public UDPClient
 {
     UDPClientImpl();

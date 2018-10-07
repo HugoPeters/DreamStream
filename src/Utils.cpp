@@ -24,10 +24,11 @@
 #include <cstdio>
 #include <string>
 
-#ifdef __linux__
+#ifdef ARDUINO
+#include <Arduino.h>
+#elif defined(__linux__)
 #include <unistd.h>
-#endif
-#ifdef _WIN32
+#elif defined(_WIN32)
 #include <windows.h>
 #endif
 
@@ -44,7 +45,11 @@ void Logger::Log(LogSeverity::Type logSeverity, const char* msg)
 
     Strfmt<LOG_BUFF_SIZE + 64> finalLogMsg("[%s]: %s\n", flagName, msg);
 
+    #ifdef ARDUINO
+    Serial.println(finalLogMsg);
+    #else
     puts(finalLogMsg);
+    #endif
 #else
     return;
 #endif
@@ -92,11 +97,12 @@ uint8_t Utils::CalculateCRC8(const uint8_t* data, int dataSize)
 
 void Utils::Sleep(int sleepMs)
 {
-#ifdef __linux__
+#ifdef ARDUINO
+    delay(sleepMs);
+#elif defined(__linux__)
     usleep(sleepMs * 1000);
-#endif
-#ifdef _WIN32
-    Sleep(sleepMs);
+#elif defined(_WIN32)
+    ::Sleep(sleepMs);
 #endif
 }
 
@@ -111,16 +117,10 @@ void Utils::DumpBytes(const uint8_t* data, int32_t dataSize, bool asWarn)
             str += Strfmt<8>("%02X ", data[i]);
         }
 
-        if (asWarn)
-            LOG_WARN("Dump: (%i bytes): %s", dataSize, str.c_str());
-        else
-            LOG_DEBUG("Dump: (%i bytes): %s", dataSize, str.c_str());
+        LOG(asWarn ? LogSeverity::WARN : LogSeverity::DEBUG, "Dump: (%i bytes): %s", dataSize, str.c_str());
     }
     else
     {
-        if (asWarn)
-            LOG_WARN("Dump: No data");
-        else
-            LOG_DEBUG("Dump: No data");
+        LOG(asWarn ? LogSeverity::WARN : LogSeverity::DEBUG, "Dump: No data!");
     }
 }

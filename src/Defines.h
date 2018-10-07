@@ -20,12 +20,14 @@
 * THE SOFTWARE.                                                                 *
 *********************************************************************************/
 
+#define ARDUINO
+
 /////// Logging
 // If you wish to disable logging (e.g. memory restraints on smaller devices)
 // simply comment out this define, or define to 0
 // You can also limit the buffer size, and log messages will simply cut off if they reach the limit
 // Do note we also allocate 64 extra bytes for printing the severity and newline (see Logger::Log)
-#define LOG_BUFF_SIZE			512
+#define LOG_BUFF_SIZE			0
 
 /////// DreamScreen specific
 #define DS_PORT					8888

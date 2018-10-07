@@ -28,7 +28,10 @@
 #include "Device.h"
 #include "Commands.h"
 #include "StaticString.h"
+
+#ifdef ENABLE_CLIENT_DEVICES
 #include <vector>
+#endif
 
 class DeviceSideKickEmu;
 

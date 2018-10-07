@@ -23,14 +23,15 @@
 #ifndef _Timer_H_
 #define _Timer_H_
 
+#include "Defines.h"
 #include <cstdint>
 
-#if _WIN32
+#ifdef ARDUINO
+
+#elif defined(_WIN32)
 #include <Winsock2.h>
 #include <time.h>
-#endif
-
-#ifdef __linux__
+#elif defined(__linux__)
 #include <stdio.h>
 #include <sys/time.h>
 #endif
@@ -53,7 +54,12 @@ struct Timer
     }
 
 private:
-#ifdef __linux__
+#ifdef ARDUINO
+    static uint64_t GetTotalMSec()
+    {
+        return millis();
+    }
+#elif defined(__linux__)
     static uint64_t GetTotalMSec()
     {
         timeval time;

@@ -25,9 +25,14 @@
 #include "Packet.h"
 #include "DeviceDreamScreen.h"
 #include "DeviceSideKick.h"
-#include <string>
 #include "DeviceEmulator.h"
 #include "Enums.h"
+
+#ifndef ARDUINO
+#include <string>
+#else
+#include "Arduino.h"
+#endif
 
 bool DeviceManager::Init(const char* broadcastAddr)
 {
@@ -85,7 +90,7 @@ void DeviceManager::Update()
 
         // hack to stop messages sent to ourselves...
         // yikes... remove this asap...
-        if (msgInfo.m_ipv4addr == "192.168.1.100")
+        if (msgInfo.m_ipv4addr == "192.168.1.71")
             continue;
 
         HandleDataReceived(msg, msgInfo);

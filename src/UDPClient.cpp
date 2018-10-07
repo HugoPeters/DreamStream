@@ -25,7 +25,83 @@
 #include <string.h>
 #include <errno.h>
 
-#if (defined(__linux__) || defined(_WIN32))
+#if defined(ARDUINO)
+
+UDPClientImpl::UDPClientImpl()
+{
+    memset(m_buffer, 0, sizeof(m_buffer));
+}
+
+UDPClientImpl::~UDPClientImpl()
+{
+
+}
+
+bool UDPClientImpl::Init(const char* /*hostname*/, uint16_t port)
+{
+    udp.begin(port);
+    return true;
+}
+
+bool UDPClientImpl::EnableBroadcast(bool enable)
+{
+    m_is_broadcast = enable;
+    return true;
+}
+
+bool UDPClientImpl::Connect(const char* host, uint16_t port)
+{
+    //TODO
+    return false;
+}
+
+bool UDPClientImpl::Send(const char* addr, uint16_t port, uint8_t* data, uint32_t dataSize)
+{
+    udp.beginPacket(addr, port);
+    udp.write(data, dataSize);
+    udp.endPacket();
+
+    return true;
+}
+
+int32_t UDPClientImpl::Receive(UDPMessage* outMsg /*= 0*/, UDPMessageInfo* outMsgInfo /*= 0*/)
+{
+    int pktSize = udp.parsePacket();
+
+    if (pktSize > 0)
+    {
+        if (outMsgInfo)
+        {
+            outMsgInfo->m_ipv4addr.Set(udp.remoteIP().toString().c_str());
+        }
+        
+        if (outMsg)
+        {
+            size_t numRead = udp.readBytes(m_buffer, sizeof(m_buffer));
+            assert(numRead < sizeof(m_buffer) && "UDP buffer overflow");
+
+            outMsg->m_length = numRead;
+            outMsg->m_data = m_buffer;
+
+            udp.flush();
+
+            return numRead;
+        }
+
+        return pktSize;
+    }
+
+    return 0;
+}
+
+bool UDPClientImpl::Select(int32_t timeoutSec, int32_t timeoutUSec)
+{
+
+    return true;
+}
+
+
+#elif (defined(__linux__) || defined(_WIN32))
 UDPClientImpl::UDPClientImpl()
     : m_socket(-1)
     , m_is_broadcast(false)

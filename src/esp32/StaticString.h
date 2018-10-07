@@ -20,39 +20,85 @@
 * THE SOFTWARE.                                                                 *
 *********************************************************************************/
 
-#include "Defines.h"
+#ifndef _StaticString_H_
+#define _StaticString_H_
 
-#ifndef ARDUINO
+#include <cstdint>
+#include <string.h>
 
-#include <cstdio>
-#include "Utils.h"
-#include "DeviceManager.h"
-
-int main(int argc, char* argv[])
+template<uint32_t TBuffSize>
+struct StaticString
 {
-    Logger::SetMinSeverity(LogSeverity::DEBUG);
-
-    LOG_INFO("DreamStream : Boot");
-
-    DeviceManager& dvmgr = DeviceManager::GetInstance();
-
-    if (!dvmgr.Init("255.255.255.255"))
-        return -1;
-
-    dvmgr.CreateEmulatedDevice();
-    dvmgr.BroadcastDiscovery();
-
-    LOG_INFO("DreamStream : Start listening for incoming packets...");
-
-    bool isRunning = true;
-
-    while (isRunning)
+public:
+    StaticString()
     {
-        Utils::Sleep(2);
-        dvmgr.Update();
+        Clear();
+    }
+    StaticString(const char* other)
+    {
+        Set(other);
     }
 
-    return 0;
-}
+    const char* Get() const { return GetBuffer(); }
 
-#endif
+    bool operator==(const char* other)
+    {
+        return strcmp(m_buffer, other) == 0;
+    }
+
+    int Strcmp(const char* other)
+    {
+        return strcmp(m_buffer, other);
+    }
+
+    void operator=(const char* other)
+    {
+        Set(other);
+    }
+
+    void Set(const char* str)
+    {
+        Clear();
+
+        if (!str)
+            return;
+
+        size_t otherStrLen = strlen(str);
+        size_t minSize = otherStrLen < TBuffSize ? otherStrLen : TBuffSize;
+        strncpy(m_buffer, str, minSize);
+    }
+
+    void Clear()
+    {
+        memset(m_buffer, 0, sizeof(m_buffer));
+    }
+
+    operator const char*() const
+    {
+        return GetBuffer();
+    }
+
+    const char* GetBuffer() const
+    {
+        return static_cast<const char*>(m_buffer);
+    }
+
+    size_t Length() const
+    {
+        return strlen(m_buffer);
+    }
+
+    uint32_t BufferLength() const { return TBuffSize; }
+
+    void CopyFrom(const uint8_t* ptr, size_t count)
+    {
+        Clear();
+        size_t minSize = count < TBuffSize ? count : TBuffSize;
+        memcpy(m_buffer, ptr, minSize);
+    }
+
+private:
+    char m_buffer[TBuffSize + 1];
+};
+
+#endif // _StaticString_H_

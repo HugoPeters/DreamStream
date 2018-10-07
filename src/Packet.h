@@ -56,7 +56,58 @@ struct PacketInfo
 
 namespace PacketUtils
 {
-    bool ReadPacketHeader(const uint8_t* data, int32_t dataSize, PacketInfo& outInfo);
+    inline bool ReadPacketHeader(const uint8_t* data, int32_t dataSize, PacketInfo& outInfo)
+    {
+        if (dataSize < sizeof(PacketHeader))
+            return false;
+
+        PacketHeader* hdr = (PacketHeader*)data;
+
+        if (hdr->m_magic != DS_PACKET_MAGIC)
+            return false;
+
+        int packetSize = hdr->m_length + 2;
+
+        if (packetSize > dataSize)
+            return false;
+
+        //uint8_t storedCrc = data[packetSize - 1];
+        //uint8_t calcCrc = Utils::CalculateCRC8(data, packetSize - 1);
+
+       // if (calcCrc != storedCrc)
+        //{
+        //    LOG_DEBUG("Packet CRCs did not match (stored=0x%x, calc=0x%x)", storedCrc, calcCrc);
+        //    return false;
+        //}
+
+        Commands::Type packetType = Commands::INVALID;
+
+        CMD cmd = { hdr->m_cmd_upper, hdr->m_cmd_lower };
+
+        for (int i = Commands::INVALID + 1; i < Commands::NUM; ++i)
+        {
+            const CommandDescriptor& desc = Commands::Descriptors[i];
+
+            if (desc.m_cmd.code == cmd.code)
+            {
+                packetType = static_cast<Commands::Type>(i);
+            }
+        }
+
+        if (packetType == Commands::INVALID)
+        {
+            //LOG_WARN("Unknown packet received! (cmd_upper=0x%x, cmd_lower=0x%x)", hdr->m_cmd_upper, hdr->m_cmd_lower);
+            return false;
+        }
+
+        outInfo.m_hdr = hdr;
+        outInfo.m_type = packetType;
+        outInfo.m_payload = data + sizeof(PacketHeader);
+        outInfo.m_payloadSize = packetSize - sizeof(PacketHeader) - 1; /* (-1 for CRC) */
+        outInfo.m_flag = hdr->m_flags; // copy the flag to minimize access
+
+        return true;
+    }
 
     template<typename T>
     static const T* GetPayloadAs(const PacketInfo& pkt)

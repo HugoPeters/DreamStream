@@ -42,6 +42,8 @@ public:
     // State setters
     //bool SetAmbientColor(uint8_t r, uint8_t g, uint8_t b) override { return false; }
 
+    virtual void HandleChangeBrightness();
+
     void HandlePacket(HandleState& hs, const UDPMessageInfo& msg, const PacketInfo& pkt) override;
 
 private:
